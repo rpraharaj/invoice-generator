@@ -1,0 +1,468 @@
+<!-- 
+  Tool Name: Invoice Generator
+  Purpose: Generates and exports professional invoices
+  Author: AI Generated
+  Date: 2023-10-27
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Invoice Generator</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" integrity="sha512-GsLlZN/3F2ErC5ifS5QtgpiJtWd43JWSuIgh7mbzZ8zBps+dvLusV+eNQATqgA/HdeKFVgA5v3S/cIrLF7QnIg==" crossorigin="anonymous" referrerpolicy="no-referrer" defer></script>
+  <style>
+    /* Additional styles for print */
+    @media print {
+      body * {
+        visibility: hidden;
+      }
+      #invoice-preview, #invoice-preview * {
+        visibility: visible;
+      }
+      #invoice-preview {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        margin: 0;
+        padding: 0;
+        border: none;
+        box-shadow: none;
+      }
+      .no-print {
+        display: none !important;
+      }
+    }
+  </style>
+</head>
+<body class="bg-gray-100 text-gray-800 font-sans">
+
+  <div class="container mx-auto p-4 lg:p-8">
+    <header class="mb-8 text-center no-print">
+      <h1 class="text-4xl font-bold text-blue-600">Invoice Generator</h1>
+      <p class="text-gray-600">Create and manage your invoices with ease.</p>
+    </header>
+
+    <!-- Main Layout: Inputs on Left, Preview on Right (Desktop) / Stacked (Mobile) -->
+    <div class="flex flex-col lg:flex-row gap-8">
+
+      <!-- Input Sections -->
+      <div class="lg:w-1/2 space-y-6 no-print">
+        
+        <!-- Sender Details -->
+        <section id="sender-details" class="bg-white p-6 rounded-2xl shadow-md">
+          <h2 class="text-2xl font-semibold mb-4 text-blue-600 border-b pb-2">Your Details (Sender)</h2>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label for="sender-name" class="block text-sm font-medium text-gray-700 mb-1">Business Name</label>
+              <input type="text" id="sender-name" name="sender-name" class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2" placeholder="Your Company LLC">
+            </div>
+            <div>
+              <label for="sender-phone" class="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
+              <input type="tel" id="sender-phone" name="sender-phone" class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2" placeholder="+1 (555) 123-4567">
+            </div>
+            <div class="md:col-span-2">
+              <label for="sender-address" class="block text-sm font-medium text-gray-700 mb-1">Address</label>
+              <textarea id="sender-address" name="sender-address" rows="3" class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2" placeholder="123 Main St, Anytown, USA"></textarea>
+            </div>
+            <div>
+              <label for="sender-email" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+              <input type="email" id="sender-email" name="sender-email" class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2" placeholder="you@example.com">
+            </div>
+            <div>
+              <label for="logo-upload" class="block text-sm font-medium text-gray-700 mb-1">Business Logo</label>
+              <input type="file" id="logo-upload" name="logo-upload" accept="image/*" class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+              <img id="logo-preview" src="#" alt="Logo Preview" class="hidden mt-2 h-16 w-auto rounded-lg border border-gray-200 p-1"/>
+              <button id="reset-logo" type="button" class="hidden mt-2 text-xs text-red-500 hover:text-red-700">Remove Logo</button>
+            </div>
+          </div>
+        </section>
+
+        <!-- Client Details -->
+        <section id="client-details" class="bg-white p-6 rounded-2xl shadow-md">
+          <h2 class="text-2xl font-semibold mb-4 text-blue-600 border-b pb-2">Client Details (Receiver)</h2>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label for="client-name" class="block text-sm font-medium text-gray-700 mb-1">Client Name</label>
+              <input type="text" id="client-name" name="client-name" class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2" placeholder="Client Company Inc.">
+            </div>
+            <div>
+              <label for="client-phone" class="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
+              <input type="tel" id="client-phone" name="client-phone" class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2" placeholder="+1 (555) 987-6543">
+            </div>
+            <div class="md:col-span-2">
+              <label for="client-address" class="block text-sm font-medium text-gray-700 mb-1">Address</label>
+              <textarea id="client-address" name="client-address" rows="3" class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2" placeholder="456 Business Rd, Client City, Country"></textarea>
+            </div>
+            <div>
+              <label for="client-email" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+              <input type="email" id="client-email" name="client-email" class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2" placeholder="client@example.com">
+            </div>
+          </div>
+        </section>
+
+        <!-- Invoice Info -->
+        <section id="invoice-info" class="bg-white p-6 rounded-2xl shadow-md">
+          <h2 class="text-2xl font-semibold mb-4 text-blue-600 border-b pb-2">Invoice Details</h2>
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div>
+              <label for="invoice-number" class="block text-sm font-medium text-gray-700 mb-1">Invoice Number</label>
+              <input type="text" id="invoice-number" name="invoice-number" class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2" placeholder="INV-001">
+            </div>
+            <div>
+              <label for="invoice-date" class="block text-sm font-medium text-gray-700 mb-1">Invoice Date</label>
+              <input type="date" id="invoice-date" name="invoice-date" class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2">
+            </div>
+            <div>
+              <label for="due-date" class="block text-sm font-medium text-gray-700 mb-1">Due Date</label>
+              <input type="date" id="due-date" name="due-date" class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2">
+            </div>
+            <div class="md:col-span-1">
+              <label for="currency" class="block text-sm font-medium text-gray-700 mb-1">Currency</label>
+              <select id="currency" name="currency" class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2">
+                <option value="USD" selected>USD ($)</option>
+                <option value="EUR">EUR (€)</option>
+                <option value="INR">INR (₹)</option>
+                <option value="GBP">GBP (£)</option>
+                <option value="CAD">CAD (C$)</option>
+                <option value="AUD">AUD (A$)</option>
+              </select>
+            </div>
+          </div>
+        </section>
+
+        <!-- Line Items -->
+        <section id="line-items-section" class="bg-white p-6 rounded-2xl shadow-md">
+          <h2 class="text-2xl font-semibold mb-4 text-blue-600 border-b pb-2">Line Items</h2>
+          <div id="line-items-container" class="space-y-4">
+            <!-- Line item row template (will be cloned by JS) -->
+            <div class="line-item-row grid grid-cols-12 gap-2 items-center border-b border-gray-200 pb-2">
+              <div class="col-span-12 sm:col-span-4">
+                <label class="text-xs text-gray-600">Description</label>
+                <input type="text" name="item-description" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-1.5" placeholder="Item or service">
+              </div>
+              <div class="col-span-3 sm:col-span-1">
+                <label class="text-xs text-gray-600">Qty</label>
+                <input type="number" name="item-quantity" min="0" value="1" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-1.5 text-center">
+              </div>
+              <div class="col-span-4 sm:col-span-2">
+                <label class="text-xs text-gray-600">Unit Price</label>
+                <input type="number" name="item-unit-price" min="0" value="0.00" step="0.01" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-1.5 text-right">
+              </div>
+              <div class="col-span-3 sm:col-span-1">
+                <label class="text-xs text-gray-600">Tax (%)</label>
+                <input type="number" name="item-tax" min="0" value="0" step="0.1" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-1.5 text-center">
+              </div>
+              <div class="col-span-8 sm:col-span-3">
+                <label class="text-xs text-gray-600">Line Total</label>
+                <input type="text" name="item-total" class="mt-1 block w-full rounded-md border-gray-300 bg-gray-100 shadow-sm sm:text-sm p-1.5 text-right" placeholder="0.00" readonly>
+              </div>
+              <div class="col-span-4 sm:col-span-1 flex items-end justify-end">
+                <button type="button" class="delete-row-btn text-red-500 hover:text-red-700 p-1.5 rounded-md hover:bg-red-100 transition-colors">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+          <button type="button" id="add-row-btn" class="mt-4 py-2 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+            <svg xmlns="http://www.w3.org/2000/svg" class="inline h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
+            </svg>
+            Add Item
+          </button>
+        </section>
+
+        <!-- Totals Section -->
+        <section id="totals-section" class="bg-white p-6 rounded-2xl shadow-md">
+            <h2 class="text-2xl font-semibold mb-4 text-blue-600 border-b pb-2">Summary</h2>
+            <div class="space-y-3">
+                <div class="flex justify-between items-center">
+                    <span class="text-gray-600">Subtotal:</span>
+                    <span id="subtotal-amount" class="font-semibold text-gray-800">0.00</span>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-gray-600">Total Tax:</span>
+                    <span id="total-tax-amount" class="font-semibold text-gray-800">0.00</span>
+                </div>
+                <div class="flex justify-between items-center">
+                    <label for="discount" class="text-gray-600">Discount:</label>
+                    <div class="flex items-center w-1/2 md:w-1/3">
+                        <input type="number" id="discount-value" name="discount-value" min="0" value="0" class="block w-2/3 rounded-l-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-1.5 text-right">
+                        <select id="discount-type" name="discount-type" class="block w-1/3 rounded-r-lg border-gray-300 border-l-0 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-1.5">
+                            <option value="percentage">%</option>
+                            <option value="flat">Flat</option>
+                        </select>
+                    </div>
+                </div>
+                 <div class="flex justify-between items-center">
+                    <label for="shipping" class="text-gray-600">Shipping Charges:</label>
+                    <input type="number" id="shipping-charges" name="shipping-charges" min="0" value="0.00" step="0.01" class="block w-1/2 md:w-1/3 rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-1.5 text-right">
+                </div>
+                <hr class="my-2 border-gray-300">
+                <div class="flex justify-between items-center text-xl font-bold text-blue-600">
+                    <span>Grand Total:</span>
+                    <div class="text-right">
+                        <span id="grand-total-currency-form" class="mr-1">USD</span><span id="grand-total-amount">0.00</span>
+                    </div>
+                </div>
+                <div class="text-xs text-gray-500 mt-1 text-right">
+                    <span id="form-amount-in-words">Zero US Dollar Only</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Payment Instructions -->
+        <section id="payment-instructions" class="bg-white p-6 rounded-2xl shadow-md">
+          <h2 class="text-2xl font-semibold mb-4 text-blue-600 border-b pb-2">Payment Instructions</h2>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label for="bank-name" class="block text-sm font-medium text-gray-700 mb-1">Bank Name</label>
+              <input type="text" id="bank-name" name="bank-name" class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2" placeholder="Global Bank Corp">
+            </div>
+            <div>
+              <label for="account-number" class="block text-sm font-medium text-gray-700 mb-1">Account Number</label>
+              <input type="text" id="account-number" name="account-number" class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2" placeholder="1234567890">
+            </div>
+            <div>
+              <label for="ifsc-swift" class="block text-sm font-medium text-gray-700 mb-1">IFSC/Swift/Sort Code</label>
+              <input type="text" id="ifsc-swift" name="ifsc-swift" class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2" placeholder="GBCNUS33">
+            </div>
+             <div>
+              <label for="upi-id" class="block text-sm font-medium text-gray-700 mb-1">UPI ID (India)</label>
+              <input type="text" id="upi-id" name="upi-id" class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2" placeholder="yourname@upi">
+            </div>
+            <div class="md:col-span-2">
+              <label for="payment-link" class="block text-sm font-medium text-gray-700 mb-1">Payment Link (e.g., PayPal, Stripe)</label>
+              <input type="url" id="payment-link" name="payment-link" class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2" placeholder="https://paypal.me/yourusername">
+            </div>
+          </div>
+        </section>
+
+        <!-- Notes & Terms -->
+        <section id="notes-terms" class="bg-white p-6 rounded-2xl shadow-md">
+          <h2 class="text-2xl font-semibold mb-4 text-blue-600 border-b pb-2">Notes & Terms</h2>
+          <div>
+            <label for="notes" class="block text-sm font-medium text-gray-700 mb-1">Notes (e.g., Thank you for your business!)</label>
+            <textarea id="notes" name="notes" rows="3" class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2" placeholder="Enter any additional notes here..."></textarea>
+          </div>
+          <div class="mt-4">
+            <label for="terms" class="block text-sm font-medium text-gray-700 mb-1">Terms & Conditions</label>
+            <textarea id="terms" name="terms" rows="4" class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2" placeholder="Payment due within 30 days. Late fees may apply."></textarea>
+          </div>
+        </section>
+        
+        <!-- Signature Upload -->
+        <section id="signature-section" class="bg-white p-6 rounded-2xl shadow-md no-print">
+          <h2 class="text-2xl font-semibold mb-4 text-blue-600 border-b pb-2">Signature</h2>
+          <div>
+            <label for="signature-upload" class="block text-sm font-medium text-gray-700 mb-1">Upload Signature Image</label>
+            <input type="file" id="signature-upload" name="signature-upload" accept="image/*" class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+            <img id="signature-preview-form" src="#" alt="Signature Preview" class="hidden mt-2 h-20 max-w-xs object-contain rounded-lg border border-gray-200 p-1"/>
+            <button id="reset-signature" type="button" class="hidden mt-2 text-xs text-red-500 hover:text-red-700">Remove Signature</button>
+          </div>
+        </section>
+
+        <!-- Display Options -->
+        <section id="display-options" class="bg-white p-6 rounded-2xl shadow-md no-print">
+          <h2 class="text-2xl font-semibold mb-4 text-blue-600 border-b pb-2">Display Options</h2>
+          <div class="space-y-3">
+            <div class="flex items-center">
+              <input id="include-payment-instructions" name="include-payment-instructions" type="checkbox" class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500" checked>
+              <label for="include-payment-instructions" class="ml-2 block text-sm text-gray-900">Include Payment Instructions</label>
+            </div>
+            <div class="flex items-center">
+              <input id="include-notes-terms" name="include-notes-terms" type="checkbox" class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500" checked>
+              <label for="include-notes-terms" class="ml-2 block text-sm text-gray-900">Include Notes & Terms</label>
+            </div>
+            <div class="flex items-center">
+              <input id="include-generation-timestamp" name="include-generation-timestamp" type="checkbox" class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500" checked>
+              <label for="include-generation-timestamp" class="ml-2 block text-sm text-gray-900">Include Generation Timestamp</label>
+            </div>
+            <div class="flex items-center">
+              <input id="include-signature" name="include-signature" type="checkbox" class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500" checked>
+              <label for="include-signature" class="ml-2 block text-sm text-gray-900">Include Signature</label>
+            </div>
+          </div>
+        </section>
+        
+        <!-- Actions -->
+        <section id="actions" class="bg-white p-6 rounded-2xl shadow-md no-print">
+          <h2 class="text-2xl font-semibold mb-4 text-blue-600 border-b pb-2">Actions</h2>
+          <div class="flex flex-wrap gap-3">
+            <button id="download-pdf-btn" class="flex-1 bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg shadow-md hover:shadow-lg transition-all duration-150 ease-in-out min-w-[120px]">Download PDF</button>
+            <button id="print-invoice-btn" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg shadow-md hover:shadow-lg transition-all duration-150 ease-in-out min-w-[120px]">Print Invoice</button>
+            <button id="send-email-btn" class="flex-1 bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-lg shadow-md hover:shadow-lg transition-all duration-150 ease-in-out min-w-[120px]">Send Email</button>
+            <button id="save-defaults-btn" class="flex-1 bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded-lg shadow-md hover:shadow-lg transition-all duration-150 ease-in-out min-w-[120px]">Save Sender Info</button>
+            <button id="reset-form-btn" type="reset" class="flex-1 bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-lg shadow-md hover:shadow-lg transition-all duration-150 ease-in-out min-w-[120px]">Reset Form</button>
+          </div>
+        </section>
+
+      </div>
+
+      <!-- Live Preview Panel -->
+      <div class="lg:w-1/2 lg:sticky lg:top-8 self-start">
+        <aside id="invoice-preview-container" class="bg-white p-2 sm:p-4 md:p-8 rounded-2xl shadow-xl">
+          <div id="invoice-preview" class="w-full aspect-[17/22] overflow-auto border border-gray-300 p-6 bg-white text-sm">
+            <!-- Invoice Header -->
+            <header class="mb-8 pb-4 border-b border-gray-300">
+              <div class="flex justify-between items-start">
+                <div class="w-2/3">
+                  <img id="preview-logo" src="" alt="Business Logo" class="mb-4 h-16 max-w-[200px] object-contain"/>
+                  <h1 id="preview-sender-name" class="text-2xl font-bold text-gray-800">Your Company LLC</h1>
+                  <p id="preview-sender-address" class="text-gray-600 whitespace-pre-line">123 Main St
+Anytown, USA</p>
+                  <p id="preview-sender-phone" class="text-gray-600">Phone: +1 (555) 123-4567</p>
+                  <p id="preview-sender-email" class="text-gray-600">Email: you@example.com</p>
+                </div>
+                <div class="text-right">
+                  <h2 class="text-3xl font-semibold uppercase text-blue-600">Invoice</h2>
+                  <p class="text-gray-700"><strong>Invoice #:</strong> <span id="preview-invoice-number">INV-001</span></p>
+                  <p class="text-gray-700"><strong>Date:</strong> <span id="preview-invoice-date">2023-10-27</span></p>
+                  <p class="text-gray-700"><strong>Due Date:</strong> <span id="preview-due-date">2023-11-26</span></p>
+                </div>
+              </div>
+            </header>
+
+            <!-- Client Info -->
+            <section class="mb-8">
+              <h3 class="text-sm font-semibold text-gray-500 uppercase mb-1">Bill To:</h3>
+              <p id="preview-client-name" class="font-bold text-gray-800">Client Company Inc.</p>
+              <p id="preview-client-address" class="text-gray-600 whitespace-pre-line">456 Business Rd
+Client City, Country</p>
+              <p id="preview-client-phone" class="text-gray-600">Phone: +1 (555) 987-6543</p>
+              <p id="preview-client-email" class="text-gray-600">Email: client@example.com</p>
+            </section>
+
+            <!-- Items Table -->
+            <section class="mb-8">
+              <table class="w-full text-left table-auto">
+                <thead class="bg-gray-100">
+                  <tr>
+                    <th class="p-2 font-semibold text-gray-700">Description</th>
+                    <th class="p-2 font-semibold text-gray-700 text-center w-16">Qty</th>
+                    <th class="p-2 font-semibold text-gray-700 text-right w-24">Unit Price</th>
+                    <th class="p-2 font-semibold text-gray-700 text-right w-20">Tax (%)</th>
+                    <th class="p-2 font-semibold text-gray-700 text-right w-28">Total</th>
+                  </tr>
+                </thead>
+                <tbody id="preview-line-items-body">
+                  <!-- JS will populate this -->
+                  <tr class="border-b border-gray-200">
+                    <td class="p-2">Sample Item 1</td>
+                    <td class="p-2 text-center">1</td>
+                    <td class="p-2 text-right">100.00</td>
+                    <td class="p-2 text-right">10%</td>
+                    <td class="p-2 text-right">110.00</td>
+                  </tr>
+                   <tr class="border-b border-gray-200">
+                    <td class="p-2">Sample Item 2</td>
+                    <td class="p-2 text-center">2</td>
+                    <td class="p-2 text-right">50.00</td>
+                    <td class="p-2 text-right">0%</td>
+                    <td class="p-2 text-right">100.00</td>
+                  </tr>
+                </tbody>
+              </table>
+            </section>
+
+            <!-- Totals -->
+            <section class="mb-8 flex justify-end">
+              <div class="w-full sm:w-1/2 md:w-2/5 space-y-1 text-gray-700">
+                <div class="flex justify-between"><span>Subtotal:</span> <span id="preview-subtotal" class="font-medium text-gray-800">200.00</span></div>
+                <div class="flex justify-between"><span>Total Tax:</span> <span id="preview-total-tax" class="font-medium text-gray-800">10.00</span></div>
+                <div class="flex justify-between"><span>Discount:</span> <span id="preview-discount" class="font-medium text-gray-800">0.00</span></div>
+                <div class="flex justify-between"><span>Shipping:</span> <span id="preview-shipping" class="font-medium text-gray-800">0.00</span></div>
+                <hr class="my-1 border-gray-300">
+                <div class="flex justify-between text-lg font-bold text-blue-600">
+                  <span>Grand Total:</span> 
+                  <div class="text-right">
+                    <span id="preview-grand-total-currency" class="mr-1">USD</span><span id="preview-grand-total">210.00</span> 
+                  </div>
+                </div>
+                <div class="text-xs text-gray-500 mt-1 italic">
+                  <p>Amount in Words: <strong id="preview-amount-in-words">Zero US Dollar Only</strong></p>
+                </div>
+              </div>
+            </section>
+
+            <!-- Payment & Notes -->
+            <footer class="pt-4 border-t border-gray-300 text-xs text-gray-600">
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div id="preview-payment-instructions-block">
+                  <h4 class="font-semibold text-gray-700 mb-1">Payment Instructions:</h4>
+                  <p id="preview-bank-details" class="whitespace-pre-line">Bank: Global Bank Corp, Acc: 1234567890</p>
+                  <p id="preview-ifsc-swift">IFSC/Swift: GBCNUS33</p>
+                  <p id="preview-upi-id">UPI: yourname@upi</p>
+                  <p id="preview-payment-link-container" class="hidden">Payment Link: <a href="#" id="preview-payment-link" class="text-blue-600 hover:underline" target="_blank">Pay Now</a></p>
+                </div>
+                <div id="preview-notes-terms-block">
+                  <h4 class="font-semibold text-gray-700 mb-1">Notes:</h4>
+                  <p id="preview-notes" class="whitespace-pre-line">Thank you for your business!</p>
+                  <h4 class="font-semibold text-gray-700 mt-2 mb-1">Terms & Conditions:</h4>
+                  <p id="preview-terms" class="whitespace-pre-line">Payment due within 30 days.</p>
+                </div>
+              </div>
+              <div id="preview-generation-timestamp-block" class="text-center mt-8 text-gray-500">
+                Generated on: <span id="generation-timestamp"></span>
+              </div>
+
+              <!-- Signature Area in Preview -->
+              <div id="preview-signature-block" class="mt-12 pt-8 text-right flex flex-col items-end">
+                <img id="preview-signature-image" src="" alt="Signature" class="h-16 object-contain mb-2" />
+                <p class="text-xs text-gray-600 border-t pt-1 w-auto text-center">Authorized Signature</p>
+              </div>
+            </footer>
+          </div>
+        </aside>
+      </div>
+    </div>
+
+    <!-- Email Modal -->
+    <div id="email-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center hidden no-print">
+      <div class="relative mx-auto p-5 border w-full max-w-md shadow-lg rounded-2xl bg-white">
+        <div class="mt-3 text-center">
+          <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-purple-100">
+            <svg class="h-6 w-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+            </svg>
+          </div>
+          <h3 class="text-lg leading-6 font-medium text-gray-900 mt-2">Simulate Sending Email</h3>
+          <div class="mt-2 px-7 py-3">
+            <p class="text-sm text-gray-500">
+              To send the invoice, you can copy the client's email and the invoice content.
+              This feature is a simulation.
+            </p>
+            <input type="text" id="email-client-address-copy" readonly class="mt-4 w-full bg-gray-100 p-2 rounded-lg border border-gray-300 text-sm" placeholder="Client's email will appear here">
+            <textarea id="email-invoice-content-copy" readonly rows="5" class="mt-2 w-full bg-gray-100 p-2 rounded-lg border border-gray-300 text-xs" placeholder="Invoice HTML content (simplified) will appear here for copying."></textarea>
+          </div>
+          <div class="items-center px-4 py-3 gap-2 flex flex-col sm:flex-row">
+            <button id="copy-email-details-btn" class="w-full sm:w-auto px-4 py-2 bg-blue-500 text-white text-base font-medium rounded-md shadow-sm hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-300">
+              Copy Details
+            </button>
+            <button id="close-email-modal-btn" class="w-full sm:w-auto px-4 py-2 bg-gray-300 text-gray-800 text-base font-medium rounded-md shadow-sm hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-300">
+              Close
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer comment -->
+    <!-- 
+      Potential Future Improvements:
+      1. Dark mode toggle.
+      2. Basic invoice template themes (switching CSS styles for the preview).
+      3. More robust localStorage management (e.g., saving multiple partial invoices).
+      4. Client/Item lookup from previously saved data.
+      5. Integration with actual email APIs (would require backend).
+      6. i18n for different languages.
+    -->
+  </div>
+
+  <script src="scripts/main.js" defer></script>
+</body>
+</html> 
